@@ -54,7 +54,7 @@
                 Logger::log('error', 'ADReset failed when attempting to check the user membership of ' . $username);
             }
 
-            return false;  
+            return false;
         }
 
         public function generateAndSendCode($username) {
@@ -69,7 +69,7 @@
                     Logger::log('error', $e . ' when attempting to generate a recovery code for ' . $username);
                     throw new Exception('The Active Directory connection failed');
                 }
-                
+
                 if ($this->isUserAllowedToReset($username, $AD)) {
                     if ($userGUID = $AD->getUserGUID($username)) {
                         $stmt = $this->db_connection->prepare('INSERT INTO emailreset (userguid, code, createtime) VALUES (?, ?, ?)');
@@ -108,7 +108,7 @@
 
                                     Logger::log ('audit', 'Reset Initiated: A password reset email request was initiated for the user "' . $username . '"');
                                     return true;
-                                }                               
+                                }
                             }
                             else {
                                 Logger::log('error', 'The user "' . $username . '" failed to a initiate a password request via email because their email was not set in Active Directory.');
@@ -124,7 +124,7 @@
                 else {
                     throw new Exception('The user does not have permission to use ADReset');
                 }
-                
+
             }
 
             throw new Exception('Unknown error');
@@ -173,7 +173,7 @@
                         if ($stmt->execute(array($userGUID, $generated_code, date ("Y-m-d H:i:s")))) {
                             $stmt = null;
                             Logger::log ('audit', 'Reset Initiated: A password reset with secret questions was initiated for the user "' . $username . '"');
-                            return $generated_code; 
+                            return $generated_code;
                         }
                         else {
                             Logger::log('error', 'The database failed to insert the generated code for "' . $username . '"');
@@ -184,7 +184,7 @@
                 else {
                     throw new Exception('The user does not have permission to use ADReset');
                 }
-                
+
             }
 
             return false;
@@ -233,7 +233,7 @@
 
             return false;
         }
-    
+
         private function cleanUpUserCodes($GUID) {
             if (isset($GUID)) {
                 $stmt = $this->db_connection->prepare('DELETE FROM emailreset WHERE userguid = ?');

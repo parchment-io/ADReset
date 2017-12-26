@@ -17,7 +17,7 @@
         private function setErrorAndQuit($message) {
             if (isset($message)) {
                 FlashMessage::flash('ChangePWError', $message);
-                header('Location: /changepw.php'); 
+                header('Location: /changepw.php');
                 exit();
             }
 
@@ -29,15 +29,20 @@
                 if (trim($_POST['user_captcha']) == $_SESSION['changepw_captcha']) {
                     if (trim($_POST['user_new_password']) == trim($_POST['user_confirm_password'])) {
                         if (ADPasswordPolicyMatch(trim($_POST['user_new_password']))) {
+                          if (!empty(trim($_POST['user_password']))) {
                             if ($this->AD_connection->changePassword(trim($_POST['user_name']), trim($_POST['user_password']), trim($_POST['user_new_password']))) {
-                                Logger::log('audit', 'Password Change Success: The user "' . $_POST['user_name'] . '" changed their password.');
-                                FlashMessage::flash('ChangePWMessage', 'Your password has been changed successfully.');
-                                header('Location: /changepw.php'); 
-                                exit();
+                              Logger::log('audit', 'Password Change Success: The user "' . $_POST['user_name'] . '" changed their password.');
+                              FlashMessage::flash('ChangePWMessage', 'Your password has been changed successfully.');
+                              header('Location: /changepw.php');
+                              exit();
+                            }
+                            else {
+                              Logger::log('audit', 'Password Change Failure: The user "' . $_POST['user_name'] . '" failed at changing their password.');
+                              $this->setErrorAndQuit('Your password could not be changed due to an incorrect password. If this is an error, please contact the Help Desk.');
                             }
                             else {
                                 Logger::log('audit', 'Password Change Failure: The user "' . $_POST['user_name'] . '" failed at changing their password.');
-                                $this->setErrorAndQuit('Your password could not be changed due to an incorrect password. If this is an error, please contact the Help Desk.');
+                                $this->setErrorAndQuit('To change your password in this manner you must enter the current password. Otherwise reset with Questions or ask an admin.');
                             }
                         }
                         else {
